@@ -22,6 +22,7 @@ public class LegacyCalendarAccessor extends AbstractCalendarAccessor {
 	keys.put(KeyIndex.CALENDARS_DISPLAY_NAME, "displayname");
     keys.put(KeyIndex.CALENDARS_VISIBLE, "selected");
     keys.put(KeyIndex.EVENTS_ID, "_id");
+    keys.put(KeyIndex.EVENTS_STATUS, "eventStatus");
     keys.put(KeyIndex.EVENTS_CALENDAR_ID, "calendar_id");
     keys.put(KeyIndex.EVENTS_DESCRIPTION, "message");
     keys.put(KeyIndex.EVENTS_LOCATION, "eventLocation");
@@ -39,6 +40,8 @@ public class LegacyCalendarAccessor extends AbstractCalendarAccessor {
     keys.put(KeyIndex.ATTENDEES_NAME, "attendeeName");
     keys.put(KeyIndex.ATTENDEES_EMAIL, "attendeeEmail");
     keys.put(KeyIndex.ATTENDEES_STATUS, "attendeeStatus");
+    keys.put(KeyIndex.ATTENDEE_TYPE, "attendeeType");
+    keys.put(KeyIndex.OWNER_ACCOUNT, "ownerAccount");
     return keys;
   }
 

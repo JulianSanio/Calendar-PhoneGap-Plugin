@@ -375,6 +375,7 @@
   [df setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
 
   for (EKEvent * event in matchingEvents) {
+    NSString *status = [[NSArray arrayWithObjects:@"None", @"Confirmed", @"Tentative", @"Canceled", nil] objectAtIndex:event.status];
     NSMutableDictionary *entry = [[NSMutableDictionary alloc] initWithObjectsAndKeys:
                                   event.title, @"title",
                                   event.calendar.title, @"calendar",
@@ -382,6 +383,7 @@
                                   [df stringFromDate:event.startDate], @"startDate",
                                   [df stringFromDate:event.endDate], @"endDate",
                                   [df stringFromDate:event.lastModifiedDate], @"lastModifiedDate",
+                                  status, @"status",
                                   nil];
     // optional fields
     if (event.location != nil) {
@@ -404,6 +406,7 @@
                                               status, @"status",
                                               type, @"type",
                                               role, @"role",
+                                              [NSNumber numberWithBool:participant.isCurrentUser], @"isCurrentUser",
                                               nil];
         [attendees addObject:attendeeEntry];
       }

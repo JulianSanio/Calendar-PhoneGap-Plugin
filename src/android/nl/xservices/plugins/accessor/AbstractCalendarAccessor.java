@@ -37,6 +37,7 @@ public abstract class AbstractCalendarAccessor {
         String message;
         String location;
         String title;
+        String status;
         String startDate;
         String endDate;
         String recurrenceFreq;
@@ -50,6 +51,7 @@ public abstract class AbstractCalendarAccessor {
         // attribute DOMString transparency;
         // attribute CalendarRepeatRule recurrence;
         // attribute DOMString reminder;
+        String calendarId;
 
         String eventId;
         boolean recurring = false;
@@ -60,6 +62,7 @@ public abstract class AbstractCalendarAccessor {
             JSONObject obj = new JSONObject();
             try {
                 obj.put("id", this.eventId);
+                obj.putOpt("status", this.status);
                 obj.putOpt("message", this.message);
                 obj.putOpt("location", this.location);
                 obj.putOpt("title", this.title);
@@ -104,6 +107,9 @@ public abstract class AbstractCalendarAccessor {
         String name;
         String email;
         String status;
+        String type;
+        String role;
+        boolean isCurrentUser = false;
 
         public JSONObject toJSONObject() {
             JSONObject obj = new JSONObject();
@@ -112,6 +118,9 @@ public abstract class AbstractCalendarAccessor {
                 obj.putOpt("name", this.name);
                 obj.putOpt("email", this.email);
                 obj.putOpt("status", this.status);
+                obj.putOpt("type", this.type);
+                obj.putOpt("role", this.role);
+                obj.put("isCurrentUser", this.isCurrentUser);
             } catch (JSONException e) {
                 throw new RuntimeException(e);
             }
@@ -134,6 +143,7 @@ public abstract class AbstractCalendarAccessor {
         CALENDARS_VISIBLE,
         CALENDARS_DISPLAY_NAME,
         EVENTS_ID,
+        EVENTS_STATUS,
         EVENTS_CALENDAR_ID,
         EVENTS_DESCRIPTION,
         EVENTS_LOCATION,
@@ -150,7 +160,9 @@ public abstract class AbstractCalendarAccessor {
         ATTENDEES_EVENT_ID,
         ATTENDEES_NAME,
         ATTENDEES_EMAIL,
-        ATTENDEES_STATUS
+        ATTENDEES_STATUS,
+        ATTENDEE_TYPE,
+        OWNER_ACCOUNT
     }
 
     protected abstract EnumMap<KeyIndex, String> initContentProviderKeys();
@@ -292,6 +304,29 @@ public abstract class AbstractCalendarAccessor {
         return calendarsWrapper;
     }
 
+    private Map<String, String> fetchCalendarOwnersAsMap(){
+        Cursor cursor = queryCalendars(
+                new String[]{
+                        this.getKey(KeyIndex.CALENDARS_ID),
+                        this.getKey(KeyIndex.OWNER_ACCOUNT)
+                },
+                this.getKey(KeyIndex.CALENDARS_VISIBLE) + "=1", null, null
+        );
+        if (cursor == null) {
+            return null;
+        }
+        Map<String, String> ownersMap = new HashMap<String, String>();
+        if (cursor.moveToFirst()) {
+            do {
+                String id = cursor.getString(cursor.getColumnIndex(this.getKey(KeyIndex.CALENDARS_ID)));
+                String owner = cursor.getString(cursor.getColumnIndex(this.getKey(KeyIndex.OWNER_ACCOUNT)));
+                ownersMap.put(id, owner);
+            } while (cursor.moveToNext());
+            cursor.close();
+        }
+        return ownersMap;
+    }
+
     private Map<String, Event> fetchEventsAsMap(Event[] instances, String calendarId) {
         // Only selecting from active calendars, no active calendars = no events.
         List<String> activeCalendarIds = Arrays.asList(getActiveCalendarIds());
@@ -324,7 +359,9 @@ public abstract class AbstractCalendarAccessor {
                 this.getKey(KeyIndex.EVENTS_START),
                 this.getKey(KeyIndex.EVENTS_END),
                 this.getKey(KeyIndex.EVENTS_RRULE),
-                this.getKey(KeyIndex.EVENTS_ALL_DAY)
+                this.getKey(KeyIndex.EVENTS_ALL_DAY),
+                this.getKey(KeyIndex.EVENTS_CALENDAR_ID),
+                this.getKey(KeyIndex.EVENTS_STATUS)
         };
         // Get all the ids at once from active calendars.
         StringBuffer select = new StringBuffer();
@@ -352,7 +389,7 @@ public abstract class AbstractCalendarAccessor {
             for (int i = 0; i < cols.length; i++) {
                 cols[i] = cursor.getColumnIndex(projection[i]);
             }
-
+            String[] eventStatus = new String[] { "Tentative", "Confirmed", "Canceled" };
             do {
                 Event event = new Event();
                 event.id = cursor.getString(cols[0]);
@@ -390,6 +427,8 @@ public abstract class AbstractCalendarAccessor {
                     event.recurring = false;
                 }
                 event.allDay = cursor.getInt(cols[7]) != 0;
+                event.calendarId = cursor.getString(cols[8]);
+                event.status = eventStatus[cursor.getInt(cols[9])];
                 eventsMap.put(event.id, event);
             } while (cursor.moveToNext());
             cursor.close();
@@ -408,7 +447,8 @@ public abstract class AbstractCalendarAccessor {
                 this.getKey(KeyIndex.ATTENDEES_ID),
                 this.getKey(KeyIndex.ATTENDEES_NAME),
                 this.getKey(KeyIndex.ATTENDEES_EMAIL),
-                this.getKey(KeyIndex.ATTENDEES_STATUS)
+                this.getKey(KeyIndex.ATTENDEES_STATUS),
+                this.getKey(KeyIndex.ATTENDEE_TYPE)
         };
         StringBuffer select = new StringBuffer();
         select.append(this.getKey(KeyIndex.ATTENDEES_EVENT_ID) + " IN (");
@@ -430,6 +470,7 @@ public abstract class AbstractCalendarAccessor {
             }
             ArrayList<Attendee> array = null;
             String currentEventId = null;
+            String[] attendeeStatus = new String[] { "Unknown", "Accepted", "Declined", "Tentative" };
             do {
                 String eventId = cursor.getString(cols[0]);
                 if (currentEventId == null || !currentEventId.equals(eventId)) {
@@ -441,7 +482,14 @@ public abstract class AbstractCalendarAccessor {
                 attendee.id = cursor.getString(cols[1]);
                 attendee.name = cursor.getString(cols[2]);
                 attendee.email = cursor.getString(cols[3]);
-                attendee.status = cursor.getString(cols[4]);
+                attendee.status = attendeeStatus[cursor.getInt(cols[4])];
+                attendee.type = cursor.getInt(cols[5]) == 3 ? "Resource" : "Person";
+                attendee.role = "Unknown";
+                if (cursor.getInt(cols[5]) == 1) {
+                    attendee.role = "Required";
+                } else if (cursor.getInt(cols[5]) == 2) {
+                    attendee.role = "Optional";
+                }
                 array.add(attendee);
             } while (cursor.moveToNext());
             cursor.close();
@@ -458,6 +506,10 @@ public abstract class AbstractCalendarAccessor {
         }
         // Fetch events from the events table for more event info.
         Map<String, Event> eventMap = fetchEventsAsMap(instances, calendarId);
+
+        // Fetch calendar owners
+        Map<String, String> ownerMap = fetchCalendarOwnersAsMap();
+
         // Fetch event attendees
         Map<String, ArrayList<Attendee>> attendeeMap =
                 fetchAttendeesForEventsAsMap(eventMap.keySet().toArray(new String[0]));
@@ -485,9 +537,17 @@ public abstract class AbstractCalendarAccessor {
                 instance.recurrenceByMonthDay = event.recurrenceByMonthDay;
                 instance.recurrenceUntil = event.recurrenceUntil;
                 instance.recurrenceCount = event.recurrenceCount;
-
                 instance.allDay = event.allDay;
+                instance.status = event.status;
+                instance.calendarId = event.calendarId;
                 instance.attendees = attendeeMap.get(instance.eventId);
+                if (instance.attendees != null) {
+                    for (Attendee attendee : instance.attendees) {
+                        if (attendee.email.equals(ownerMap.get(event.calendarId))) {
+                            attendee.isCurrentUser = true;
+                        }
+                    }
+                }
                 result.put(instance.toJSONObject());
             }
         }
