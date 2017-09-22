@@ -1,3 +1,5 @@
+Fork of PhoneGap Calendar plugin with some extensions.
+
 # PhoneGap Calendar plugin
 
 for iOS and Android, by [Eddy Verbruggen](http://www.x-services.nl)
