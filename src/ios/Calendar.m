@@ -118,9 +118,6 @@
   NSTimeInterval _endInterval = [endTime doubleValue] / 1000; // strip millis
   NSDate *myEndDate = [NSDate dateWithTimeIntervalSince1970:_endInterval];
 
-  NSDateFormatter *df = [[NSDateFormatter alloc] init];
-  [df setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
-
   NSDictionary* calOptions = [options objectForKey:@"options"];
   NSString* calEventID = [calOptions objectForKey:@"id"];
   // the only search param we're currently matching against is the calendarName, so ignoring any passed reminder values etc

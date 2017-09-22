@@ -60,6 +60,8 @@ public class Calendar extends CordovaPlugin {
   private static final int PERMISSION_REQCODE_LIST_CALENDARS = 201;
   private static final int PERMISSION_REQCODE_LIST_EVENTS_IN_RANGE = 202;
 
+  private static final int PERMISSION_DENIED_ERROR = 20;
+
   private static final Integer RESULT_CODE_CREATE = 0;
   private static final Integer RESULT_CODE_OPENCAL = 1;
 
@@ -182,26 +184,34 @@ public class Calendar extends CordovaPlugin {
     for (int r : grantResults) {
       if (r == PackageManager.PERMISSION_DENIED) {
         Log.d(LOG_TAG, "Permission Denied!");
-        this.callback.error("Please allow access to the Calendar and try again.");
+        this.callback.sendPluginResult(new PluginResult(PluginResult.Status.ERROR, PERMISSION_DENIED_ERROR));
         return;
       }
     }
 
     // now call the originally requested actions
-    if (requestCode == PERMISSION_REQCODE_CREATE_CALENDAR) {
-      createCalendar(requestArgs);
-    } else if (requestCode == PERMISSION_REQCODE_DELETE_CALENDAR) {
-      deleteCalendar(requestArgs);
-    } else if (requestCode == PERMISSION_REQCODE_CREATE_EVENT) {
-      createEvent(requestArgs);
-    } else if (requestCode == PERMISSION_REQCODE_DELETE_EVENT) {
-      deleteEvent(requestArgs);
-    } else if (requestCode == PERMISSION_REQCODE_FIND_EVENTS) {
-      findEvents(requestArgs);
-    } else if (requestCode == PERMISSION_REQCODE_LIST_CALENDARS) {
-      listCalendars();
-    } else if (requestCode == PERMISSION_REQCODE_LIST_EVENTS_IN_RANGE) {
-      listEventsInRange(requestArgs);
+    switch(requestCode) {
+      case PERMISSION_REQCODE_CREATE_CALENDAR:
+        createCalendar(requestArgs);
+        break;
+      case PERMISSION_REQCODE_DELETE_CALENDAR:
+        deleteCalendar(requestArgs);
+        break;
+      case PERMISSION_REQCODE_CREATE_EVENT:
+        createEvent(requestArgs);
+        break;
+      case PERMISSION_REQCODE_DELETE_EVENT:
+        deleteEvent(requestArgs);
+        break;
+      case PERMISSION_REQCODE_FIND_EVENTS:
+        findEvents(requestArgs);
+        break;
+      case PERMISSION_REQCODE_LIST_CALENDARS:
+        listCalendars();
+        break;
+      case PERMISSION_REQCODE_LIST_EVENTS_IN_RANGE:
+        listEventsInRange(requestArgs);
+        break;
     }
   }
 
