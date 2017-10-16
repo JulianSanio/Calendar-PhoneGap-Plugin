@@ -41,6 +41,7 @@ public class LegacyCalendarAccessor extends AbstractCalendarAccessor {
     keys.put(KeyIndex.ATTENDEES_EMAIL, "attendeeEmail");
     keys.put(KeyIndex.ATTENDEES_STATUS, "attendeeStatus");
     keys.put(KeyIndex.ATTENDEE_TYPE, "attendeeType");
+    keys.put(KeyIndex.ATTENDEE_RELATIONSHIP, "attendeeRelationship");
     keys.put(KeyIndex.OWNER_ACCOUNT, "ownerAccount");
     return keys;
   }

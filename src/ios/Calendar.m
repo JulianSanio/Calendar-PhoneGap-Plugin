@@ -368,6 +368,21 @@
   return nil;
 }
 
+- (NSMutableDictionary*) participantToEntry:(EKParticipant*)participant {
+  NSArray *roles = [NSArray arrayWithObjects:@"Unknown", @"Required", @"Optional", @"Chair", @"Non Participant", nil];
+  NSArray *status = [NSArray arrayWithObjects:@"Unknown", @"Pending", @"Accepted", @"Declined", @"Tentative", @"Delegated", @"Completed", @"In Process", nil];
+  NSArray *types = [NSArray arrayWithObjects:@"Unknown", @"Person", @"Room", @"Resource", @"Group", nil];
+  NSMutableDictionary *entry = [[NSMutableDictionary alloc] initWithObjectsAndKeys:
+                                participant.name, @"name",
+                                [participant.URL resourceSpecifier], @"email",
+                                [status objectAtIndex:participant.participantStatus], @"status",
+                                [types objectAtIndex:participant.participantType], @"type",
+                                [roles objectAtIndex:participant.participantRole], @"role",
+                                [NSNumber numberWithBool:participant.isCurrentUser], @"isCurrentUser",
+                                nil];
+  return entry;
+}
+
 - (NSMutableArray*) eventsToDataArray: (NSArray*)matchingEvents {
   NSMutableArray *results = [[NSMutableArray alloc] initWithCapacity:matchingEvents.count];
 
@@ -394,21 +409,13 @@
     }
     if (event.attendees != nil) {
       NSMutableArray * attendees = [[NSMutableArray alloc] init];
+      if (event.organizer != nil) {
+        NSMutableDictionary *organizerEntry = [self participantToEntry:event.organizer];
+        [organizerEntry setValue:@"Organizer" forKey:@"type"];
+        [attendees addObject:organizerEntry];
+      }
       for (EKParticipant * participant in event.attendees) {
-
-        NSString *role = [[NSArray arrayWithObjects:@"Unknown", @"Required", @"Optional", @"Chair", @"Non Participant", nil] objectAtIndex:participant.participantRole];
-        NSString *status = [[NSArray arrayWithObjects:@"Unknown", @"Pending", @"Accepted", @"Declined", @"Tentative", @"Delegated", @"Completed", @"In Process", nil] objectAtIndex:participant.participantStatus];
-        NSString *type = [[NSArray arrayWithObjects:@"Unknown", @"Person", @"Room", @"Resource", @"Group", nil] objectAtIndex:participant.participantType];
-
-        NSMutableDictionary *attendeeEntry = [[NSMutableDictionary alloc] initWithObjectsAndKeys:
-                                              participant.name, @"name",
-                                              [participant.URL absoluteString], @"URL",
-                                              status, @"status",
-                                              type, @"type",
-                                              role, @"role",
-                                              [NSNumber numberWithBool:participant.isCurrentUser], @"isCurrentUser",
-                                              nil];
-        [attendees addObject:attendeeEntry];
+        [attendees addObject:[self participantToEntry:participant]];
       }
       [entry setObject:attendees forKey:@"attendees"];
     }

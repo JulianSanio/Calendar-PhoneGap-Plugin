@@ -162,6 +162,7 @@ public abstract class AbstractCalendarAccessor {
         ATTENDEES_EMAIL,
         ATTENDEES_STATUS,
         ATTENDEE_TYPE,
+        ATTENDEE_RELATIONSHIP,
         OWNER_ACCOUNT
     }
 
@@ -448,7 +449,8 @@ public abstract class AbstractCalendarAccessor {
                 this.getKey(KeyIndex.ATTENDEES_NAME),
                 this.getKey(KeyIndex.ATTENDEES_EMAIL),
                 this.getKey(KeyIndex.ATTENDEES_STATUS),
-                this.getKey(KeyIndex.ATTENDEE_TYPE)
+                this.getKey(KeyIndex.ATTENDEE_TYPE),
+                this.getKey(KeyIndex.ATTENDEE_RELATIONSHIP)
         };
         StringBuffer select = new StringBuffer();
         select.append(this.getKey(KeyIndex.ATTENDEES_EVENT_ID) + " IN (");
@@ -484,6 +486,9 @@ public abstract class AbstractCalendarAccessor {
                 attendee.email = cursor.getString(cols[3]);
                 attendee.status = attendeeStatus[cursor.getInt(cols[4])];
                 attendee.type = cursor.getInt(cols[5]) == 3 ? "Resource" : "Person";
+                if (cursor.getInt(cols[6]) == 2) {
+                    attendee.type = "Organizer";
+                }
                 attendee.role = "Unknown";
                 if (cursor.getInt(cols[5]) == 1) {
                     attendee.role = "Required";

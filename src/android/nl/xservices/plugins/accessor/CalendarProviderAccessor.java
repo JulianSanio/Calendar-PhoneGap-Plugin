@@ -47,6 +47,7 @@ public class CalendarProviderAccessor extends AbstractCalendarAccessor {
     keys.put(KeyIndex.ATTENDEES_EMAIL, Attendees.ATTENDEE_EMAIL);
     keys.put(KeyIndex.ATTENDEES_STATUS, Attendees.ATTENDEE_STATUS);
     keys.put(KeyIndex.ATTENDEE_TYPE, Attendees.ATTENDEE_TYPE);
+    keys.put(KeyIndex.ATTENDEE_RELATIONSHIP, Attendees.ATTENDEE_RELATIONSHIP);
     keys.put(KeyIndex.OWNER_ACCOUNT, Calendars.OWNER_ACCOUNT);
     return keys;
   }
