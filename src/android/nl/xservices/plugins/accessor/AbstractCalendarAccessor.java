@@ -470,7 +470,7 @@ public abstract class AbstractCalendarAccessor {
             }
             ArrayList<Attendee> array = null;
             String currentEventId = null;
-            String[] attendeeStatus = new String[] { "Unknown", "Accepted", "Declined", "Tentative" };
+            String[] attendeeStatus = new String[] { "Unknown", "Accepted", "Declined", "Invited", "Tentative" };
             do {
                 String eventId = cursor.getString(cols[0]);
                 if (currentEventId == null || !currentEventId.equals(eventId)) {
