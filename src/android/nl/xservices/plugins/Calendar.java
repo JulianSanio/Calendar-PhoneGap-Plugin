@@ -6,7 +6,6 @@ import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
@@ -32,12 +31,15 @@ import static android.provider.CalendarContract.Events;
 public class Calendar extends CordovaPlugin {
   private static final String HAS_READ_PERMISSION = "hasReadPermission";
   private static final String REQUEST_READ_PERMISSION = "requestReadPermission";
+  private static final int PERMISSION_REQCODE_READ = 0;
 
   private static final String HAS_WRITE_PERMISSION = "hasWritePermission";
   private static final String REQUEST_WRITE_PERMISSION = "requestWritePermission";
+  private static final int PERMISSION_REQCODE_WRITE = 1;
 
   private static final String HAS_READWRITE_PERMISSION = "hasReadWritePermission";
   private static final String REQUEST_READWRITE_PERMISSION = "requestReadWritePermission";
+  private static final int PERMISSION_REQCODE_READ_WRITE = 2;
 
   private static final String ACTION_OPEN_CALENDAR = "openCalendar";
   private static final String ACTION_CREATE_EVENT_WITH_OPTIONS = "createEventWithOptions";
@@ -59,8 +61,6 @@ public class Calendar extends CordovaPlugin {
   private static final int PERMISSION_REQCODE_FIND_EVENTS = 200;
   private static final int PERMISSION_REQCODE_LIST_CALENDARS = 201;
   private static final int PERMISSION_REQCODE_LIST_EVENTS_IN_RANGE = 202;
-
-  private static final int PERMISSION_DENIED_ERROR = 20;
 
   private static final Integer RESULT_CODE_CREATE = 0;
   private static final Integer RESULT_CODE_OPENCAL = 1;
@@ -123,13 +123,13 @@ public class Calendar extends CordovaPlugin {
       hasReadWritePermission();
       return true;
     } else if (REQUEST_READ_PERMISSION.equals(action)) {
-      requestReadPermission(0);
+      requestReadPermission(PERMISSION_REQCODE_READ);
       return true;
     } else if (REQUEST_WRITE_PERMISSION.equals(action)) {
-      requestWritePermission(0);
+      requestWritePermission(PERMISSION_REQCODE_WRITE);
       return true;
     } else if (REQUEST_READWRITE_PERMISSION.equals(action)) {
-      requestReadWritePermission(0);
+      requestReadWritePermission(PERMISSION_REQCODE_READ_WRITE);
       return true;
     }
     return false;
@@ -181,16 +181,17 @@ public class Calendar extends CordovaPlugin {
   }
 
   public void onRequestPermissionResult(int requestCode, String[] permissions, int[] grantResults) throws JSONException {
-    for (int r : grantResults) {
-      if (r == PackageManager.PERMISSION_DENIED) {
-        Log.d(LOG_TAG, "Permission Denied!");
-        this.callback.sendPluginResult(new PluginResult(PluginResult.Status.ERROR, PERMISSION_DENIED_ERROR));
-        return;
-      }
-    }
 
-    // now call the originally requested actions
     switch(requestCode) {
+      case PERMISSION_REQCODE_READ:
+        hasReadPermission();
+        break;
+      case PERMISSION_REQCODE_WRITE:
+        hasWritePermission();
+        break;
+      case PERMISSION_REQCODE_READ_WRITE:
+        hasReadWritePermission();
+        break;
       case PERMISSION_REQCODE_CREATE_CALENDAR:
         createCalendar(requestArgs);
         break;

@@ -12,32 +12,41 @@
 #pragma mark Initialization functions
 
 - (void) pluginInitialize {
-    [self initEventStoreWithCalendarCapabilities];
-}
-
-- (void) initEventStoreWithCalendarCapabilities {
-  __block BOOL accessGranted = NO;
-  EKEventStore* eventStoreCandidate = [[EKEventStore alloc] init];
-  if([eventStoreCandidate respondsToSelector:@selector(requestAccessToEntityType:completion:)]) {
-    dispatch_semaphore_t sema = dispatch_semaphore_create(0);
-    [eventStoreCandidate requestAccessToEntityType:EKEntityTypeEvent completion:^(BOOL granted, NSError *error) {
-      accessGranted = granted;
-      dispatch_semaphore_signal(sema);
-    }];
-    dispatch_semaphore_wait(sema, DISPATCH_TIME_FOREVER);
-  } else { // we're on iOS 5 or older
-    accessGranted = YES;
-  }
-
-  if (accessGranted) {
-    self.eventStore = eventStoreCandidate;
-  }
+    self.eventStore = [[EKEventStore alloc] init];
 }
 
 #pragma mark Helper Functions
 
+- (BOOL) hasCalendarPermission {
+    EKAuthorizationStatus authorizationStatus = EKAuthorizationStatusAuthorized;
+    if ([[EKEventStore class] respondsToSelector:@selector(authorizationStatusForEntityType:)]) {
+        authorizationStatus = [EKEventStore authorizationStatusForEntityType:EKEntityTypeEvent];
+    }
+    return authorizationStatus == EKAuthorizationStatusAuthorized;
+}
+
+- (BOOL) requestCalendarPermission {
+    __block BOOL accessGranted = YES;
+    if([self.eventStore respondsToSelector:@selector(requestAccessToEntityType:completion:)]) {
+        dispatch_semaphore_t sema = dispatch_semaphore_create(0);
+        [self.eventStore requestAccessToEntityType:EKEntityTypeEvent completion:^(BOOL granted, NSError *error) {
+            accessGranted = granted;
+            dispatch_semaphore_signal(sema);
+        }];
+        dispatch_semaphore_wait(sema, DISPATCH_TIME_FOREVER);
+    }
+    if (accessGranted) {
+        self.eventStore = [[EKEventStore alloc] init];
+    }
+    return accessGranted;
+}
+
 - (void) createEventWithCalendar:(CDVInvokedUrlCommand*)command
                        calendar: (EKCalendar *) calendar {
+  if (![self hasCalendarPermission]) {
+    [self requestCalendarPermission];
+  }
+
   NSDictionary* options = [command.arguments objectAtIndex:0];
   NSString* title      = [options objectForKey:@"title"];
   NSString* location   = [options objectForKey:@"location"];
@@ -99,6 +108,10 @@
 }
 
 - (void) modifyEventWithOptions:(CDVInvokedUrlCommand*)command {
+  if (![self hasCalendarPermission]) {
+    [self requestCalendarPermission];
+  }
+
   NSDictionary* options = [command.arguments objectAtIndex:0];
   NSString* title      = [options objectForKey:@"title"];
   NSString* location   = [options objectForKey:@"location"];
@@ -257,6 +270,9 @@
 
 - (void) deleteEventFromCalendar:(CDVInvokedUrlCommand*)command
                        calendar: (EKCalendar *) calendar {
+  if (![self hasCalendarPermission]) {
+    [self requestCalendarPermission];
+  }
 
   NSDictionary* options = [command.arguments objectAtIndex:0];
   NSString* title      = [options objectForKey:@"title"];
@@ -476,6 +492,10 @@
 #pragma mark Cordova functions
 
 - (void) openCalendar:(CDVInvokedUrlCommand*)command {
+  if (![self hasCalendarPermission]) {
+    [self requestCalendarPermission];
+  }
+
   NSDictionary* options = [command.arguments objectAtIndex:0];
   NSNumber* date = [options objectForKey:@"date"];
 
@@ -490,6 +510,10 @@
 }
 
 - (void) listCalendars:(CDVInvokedUrlCommand*)command {
+  if (![self hasCalendarPermission]) {
+    [self requestCalendarPermission];
+  }
+
   [self.commandDelegate runInBackground: ^{
     NSArray * calendars = [self.eventStore calendarsForEntityType:EKEntityTypeEvent];
     NSMutableArray *finalResults = [[NSMutableArray alloc] initWithCapacity:calendars.count];
@@ -509,6 +533,10 @@
 }
 
 - (void) listEventsInRange:(CDVInvokedUrlCommand*)command {
+  if (![self hasCalendarPermission]) {
+    [self requestCalendarPermission];
+  }
+
   NSDictionary* options = [command.arguments objectAtIndex:0];
   NSNumber* startTime  = [options objectForKey:@"startTime"];
   NSNumber* endTime    = [options objectForKey:@"endTime"];
@@ -538,6 +566,10 @@
 }
 
 - (void)createEventWithOptions:(CDVInvokedUrlCommand*)command {
+  if (![self hasCalendarPermission]) {
+    [self requestCalendarPermission];
+  }
+    
   NSDictionary* options = [command.arguments objectAtIndex:0];
 
   NSString* title      = [options objectForKey:@"title"];
@@ -646,6 +678,10 @@
 }
 
 - (void) createEventInteractively:(CDVInvokedUrlCommand*)command {
+  if (![self hasCalendarPermission]) {
+    [self requestCalendarPermission];
+  }
+
   NSDictionary* options = [command.arguments objectAtIndex:0];
 
   NSString* title      = [options objectForKey:@"title"];
@@ -754,6 +790,10 @@
 }
 
 - (void) deleteEventFromNamedCalendar:(CDVInvokedUrlCommand*)command {
+  if (![self hasCalendarPermission]) {
+    [self requestCalendarPermission];
+  }
+
   NSDictionary* options = [command.arguments objectAtIndex:0];
   NSString* calendarName = [options objectForKey:@"calendarName"];
   EKCalendar* calendar = [self findEKCalendar:calendarName];
@@ -771,6 +811,10 @@
 
 
 - (void) deleteEvent:(CDVInvokedUrlCommand*)command {
+  if (![self hasCalendarPermission]) {
+    [self requestCalendarPermission];
+  }
+    
   EKCalendar* calendar = self.eventStore.defaultCalendarForNewEvents;
 
   if (calendar == nil) {
@@ -782,6 +826,10 @@
 }
 
 - (void) findAllEventsInNamedCalendar:(CDVInvokedUrlCommand*)command {
+  if (![self hasCalendarPermission]) {
+    [self requestCalendarPermission];
+  }
+    
   NSDictionary* options = [command.arguments objectAtIndex:0];
   NSString* calendarName = [options objectForKey:@"calendarName"];
   EKCalendar* calendar = [self findEKCalendar:calendarName];
@@ -803,6 +851,10 @@
 
 
 - (void) findEventWithOptions:(CDVInvokedUrlCommand*)command {
+  if (![self hasCalendarPermission]) {
+    [self requestCalendarPermission];
+  }
+
   NSDictionary* options = [command.arguments objectAtIndex:0];
   NSString* title      = [options objectForKey:@"title"];
   NSString* location   = [options objectForKey:@"location"];
@@ -875,6 +927,10 @@
 
 
 - (void) createCalendar:(CDVInvokedUrlCommand*)command {
+  if (![self hasCalendarPermission]) {
+    [self requestCalendarPermission];
+  }
+
   NSDictionary* options = [command.arguments objectAtIndex:0];
   NSString* calendarName = [options objectForKey:@"calendarName"];
   NSString* hexColor = [options objectForKey:@"calendarColor"];
@@ -921,6 +977,10 @@
 }
 
 - (void) deleteCalendar:(CDVInvokedUrlCommand*)command {
+  if (![self hasCalendarPermission]) {
+    [self requestCalendarPermission];
+  }
+
   NSDictionary* options = [command.arguments objectAtIndex:0];
   NSString* calendarName = [options objectForKey:@"calendarName"];
 
@@ -980,39 +1040,33 @@
 
 /* There is no distinction between read and write access in iOS */
 - (void)hasReadPermission:(CDVInvokedUrlCommand*)command {
-  CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:(self.eventStore != nil)];
+  CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:[self hasCalendarPermission]];
   [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
 - (void)requestReadPermission:(CDVInvokedUrlCommand*)command {
-  CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:[self requestCalendarAccess]];
+  CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:[self requestCalendarPermission]];
   [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
 - (void)hasWritePermission:(CDVInvokedUrlCommand*)command {
-  CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:(self.eventStore != nil)];
+  CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:[self hasCalendarPermission]];
   [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
 - (void)requestWritePermission:(CDVInvokedUrlCommand*)command {
-  CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:[self requestCalendarAccess]];
+  CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:[self requestCalendarPermission]];
   [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
 - (void)hasReadWritePermission:(CDVInvokedUrlCommand*)command {
-  CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:(self.eventStore != nil)];
+  CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:[self hasCalendarPermission]];
   [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
 - (void)requestReadWritePermission:(CDVInvokedUrlCommand*)command {
-  CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:[self requestCalendarAccess]];
+  CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:[self requestCalendarPermission]];
   [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
-
--(CDVCommandStatus)requestCalendarAccess{
-    [self initEventStoreWithCalendarCapabilities];
-    return (self.eventStore != nil) ? CDVCommandStatus_OK : CDVCommandStatus_ERROR;
-}
-
 
 @end

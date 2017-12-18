@@ -5,10 +5,8 @@
 
 @interface Calendar : CDVPlugin <EKEventEditViewDelegate>
 
-@property (nonatomic, retain) EKEventStore* eventStore;
+@property (strong, nonatomic) EKEventStore* eventStore;
 @property (nonatomic, copy) NSString *interactiveCallbackId;
-
-- (void)initEventStoreWithCalendarCapabilities;
 
 -(NSArray*)findEKEventsWithTitle: (NSString *)title
                         location: (NSString *)location
