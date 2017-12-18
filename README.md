@@ -1,39 +1,25 @@
-Fork of PhoneGap Calendar plugin with some extensions.
+Fork of PhoneGap Calendar plugin by [Eddy Verbruggen](https://github.com/EddyVerbruggen/Calendar-PhoneGap-Plugin) with some improvements and extensions.
 
 # PhoneGap Calendar plugin
 
-for iOS and Android, by [Eddy Verbruggen](http://www.x-services.nl)
+for iOS and Android by Julian Sanio
 
-
-[![paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donate_SM.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=eddyverbruggen%40gmail%2ecom&lc=US&item_name=cordova%2dplugin%2dcalendar&currency_code=EUR&bn=PP%2dDonationsBF%3abtn_donate_SM%2egif%3aNonHosted)
-Every now and then kind folks ask me how they can give me all their money.
-Of course I'm happy to receive any amount but I'm just as happy if you simply 'star' this project.
-
-<table width="100%">
-  <tr>
-    <td width="100"><a href="http://plugins.telerik.com/plugin/calendar"><img src="http://www.x-services.nl/github-images/telerik-verified-plugins-marketplace.png" width="97px" height="71px" alt="Marketplace logo"/></a></td>
-    <td>For a quick demo app and easy code samples, check out the plugin page at the Verified Plugins Marketplace: http://plugins.telerik.com/plugin/calendar</td>
-  </tr>
-</table>
-
-1. [Description](https://github.com/EddyVerbruggen/Calendar-PhoneGap-Plugin#1-description)
-2. [Installation](https://github.com/EddyVerbruggen/Calendar-PhoneGap-Plugin#2-installation)
-	2. [Automatically](https://github.com/EddyVerbruggen/Calendar-PhoneGap-Plugin#automatically)
-	2. [Manually](https://github.com/EddyVerbruggen/Calendar-PhoneGap-Plugin#manually)
-	2. [PhoneGap Build](https://github.com/EddyVerbruggen/Calendar-PhoneGap-Plugin#phonegap-build)
-3. [Usage](https://github.com/EddyVerbruggen/Calendar-PhoneGap-Plugin#3-usage)
-4. [Promises](https://github.com/EddyVerbruggen/Calendar-PhoneGap-Plugin#4-promises)
-5. [Credits](https://github.com/EddyVerbruggen/Calendar-PhoneGap-Plugin#5-credits)
-6. [License](https://github.com/EddyVerbruggen/Calendar-PhoneGap-Plugin#6-license)
+1. [Description](https://github.com/JulianSanio/Calendar-PhoneGap-Plugin#1-description)
+2. [Installation](https://github.com/JulianSanio/Calendar-PhoneGap-Plugin#2-installation)
+3. [Usage](https://github.com/JulianSanio/Calendar-PhoneGap-Plugin#3-usage)
+4. [Promises](https://github.com/JulianSanio/Calendar-PhoneGap-Plugin#4-promises)
+5. [Credits](https://github.com/JulianSanio/Calendar-PhoneGap-Plugin#5-credits)
+6. [License](https://github.com/JulianSanio/Calendar-PhoneGap-Plugin#6-license)
 
 ## 1. Description
 
-This plugin allows you to add events to the Calendar of the mobile device.
+This plugin provides CRUD operations on calendar of your mobile device. You can list, open, create and delete calendars as well as list, create, modify and delete events.
 
 * Works with PhoneGap >= 3.0.
 * For PhoneGap 2.x, see [the pre-3.0 branch](https://github.com/EddyVerbruggen/Calendar-PhoneGap-Plugin/tree/pre-3.0).
 * Compatible with [Cordova Plugman](https://github.com/apache/cordova-plugman).
 * [Officially supported by PhoneGap Build](https://build.phonegap.com/plugins).
+* Works with Ionic 2+, use [Ionic Native wrapper](https://github.com/ionic-team/ionic-native)
 
 ### iOS specifics
 * Supported methods: `find`, `create`, `modify`, `delete`, ..
@@ -55,14 +41,16 @@ cordova plugin add cordova-plugin-calendar --variable CALENDAR_USAGE_DESCRIPTION
 ## 2. Installation
 
 ### Automatically
-Latest release on npm:
+Specific version:
+
 ```
-$ cordova plugin add cordova-plugin-calendar
+$ cordova plugin add https://github.com/JulianSanio/Calendar-PhoneGap-Plugin.git#5.0.0
 ```
 
-Bleeding edge, from github:
+Latest dev version:
+
 ```
-$ cordova plugin add https://github.com/EddyVerbruggen/Calendar-PhoneGap-Plugin.git
+$ cordova plugin add https://github.com/JulianSanio/Calendar-PhoneGap-Plugin.git
 ```
 
 ### Manually
@@ -70,6 +58,7 @@ $ cordova plugin add https://github.com/EddyVerbruggen/Calendar-PhoneGap-Plugin.
 #### iOS
 
 1\. Add the following xml to your `config.xml`:
+
 ```xml
 <!-- for iOS -->
 <feature name="Calendar">
@@ -78,6 +67,7 @@ $ cordova plugin add https://github.com/EddyVerbruggen/Calendar-PhoneGap-Plugin.
 ```
 
 2\. Grab a copy of Calendar.js, add it to your project and reference it in `index.html`:
+
 ```html
 <script type="text/javascript" src="js/Calendar.js"></script>
 ```
@@ -91,6 +81,7 @@ Copy `Calendar.h` and `Calendar.m` to `platforms/ios/<ProjectName>/Plugins`
 #### Android
 
 1\. Add the following xml to your `config.xml`:
+
 ```xml
 <!-- for Android -->
 <feature name="Calendar">
@@ -99,6 +90,7 @@ Copy `Calendar.h` and `Calendar.m` to `platforms/ios/<ProjectName>/Plugins`
 ```
 
 2\. Grab a copy of Calendar.js, add it to your project and reference it in `index.html`:
+
 ```html
 <script type="text/javascript" src="js/Calendar.js"></script>
 ```
@@ -109,6 +101,7 @@ Android: Copy `Calendar.java` to `platforms/android/src/nl/xservices/plugins` (c
 Then create a package called `accessor` and copy other 3 java Classes into it.
 
 4\. Add these permissions to your AndroidManifest.xml:
+
 ```xml
 <uses-permission android:name="android.permission.READ_CALENDAR"/>
 <uses-permission android:name="android.permission.WRITE_CALENDAR"/>
@@ -121,13 +114,24 @@ use one function of this plugin: `createEventInteractively`.
 ### PhoneGap Build
 
 Add the following xml to your `config.xml` to always use the latest npm version of this plugin:
+
 ```xml
 <plugin name="cordova-plugin-calendar" />
 ```
 
 Also, make sure you're building with Gradle by adding this to your `config.xml` file:
+
 ```xml
 <preference name="android-build-tool" value="gradle" />
+```
+
+### Ionic Build
+
+If you want to add this plugin to your Ionic project, you need to add the plugin itself as well as the respective Ionic Native plugin wrapper:
+
+```
+$ cordova plugin add https://github.com/JulianSanio/Calendar-PhoneGap-Plugin.git#5.0.0
+$ npm install @ionic-native/calendar --save
 ```
 
 ## 3. Usage
@@ -137,27 +141,34 @@ The table gives an overview of basic operation compatibility:
 Operation                           | Comment     | iOS | Android | Windows |
 ----------------------------------- | ----------- | --- | ------- | ------- |
 createCalendar                      |             | yes | yes     |         |
+listCalendars                       |             | yes | yes     |         |
 deleteCalendar                      |             | yes | yes     |         |
+openCalendar                        |             | yes | yes     |         |
 createEvent                         | silent      | yes | yes *   | yes **  |
 createEventWithOptions              | silent      | yes | yes *   | yes **  |
 createEventInteractively            | interactive | yes | yes     | yes **  |
 createEventInteractivelyWithOptions | interactive | yes | yes     | yes **  |
-findEvent                           |             | yes | yes     |         |
-findEventWithOptions                |             | yes | yes     |         |
-listEventsInRange                   |             |     | yes     |         |
-listCalendars                       |             | yes | yes     |         |
-findAllEventsInNamedCalendars       |             | yes |         |         |
 modifyEvent                         |             | yes |         |         |
 modifyEventWithOptions              |             | yes |         |         |
+findEvent                           |             | yes | yes     |         |
+findEventWithOptions                |             | yes | yes     |         |
+findAllEventsInNamedCalendars       |             | yes |         |         |
+listEventsInRange                   |             |     | yes     |         |
 deleteEvent                         |             | yes | yes     |         |
 deleteEventFromNamedCalendar        |             | yes |         |         |
-openCalendar                        |             | yes | yes     |         |
+hasReadWritePermission              |             | yes | yes     |         |
+hasReadPermission                   |             | yes | yes     |         |
+hasWritePermission                  |             | yes | yes     |         |
+requestWritePermission              |             | yes | yes     |         |
+requestReadPermission               |             | yes | yes     |         |
+requestReadWritePermission          |             | yes | yes     |         |
 
-* \* on Android < 4 dialog is shown
-* \** only interactively on windows mobile
+\* on Android < 4 dialog is shown
+\** only interactively on windows mobile
 
 Basic operations, you'll want to copy-paste this for testing purposes:
-```js
+
+```javascript
   // prep some variables
   var startDate = new Date(2015,2,15,18,30,0,0,0); // beware: month 0 = january, 11 = december
   var endDate = new Date(2015,2,15,19,30,0,0,0);
@@ -259,59 +270,96 @@ Basic operations, you'll want to copy-paste this for testing purposes:
 ```
 
 Creating an all day event:
-```js
+
+```javascript
   // set the startdate to midnight and set the enddate to midnight the next day
   var startDate = new Date(2014,2,15,0,0,0,0,0);
   var endDate = new Date(2014,2,16,0,0,0,0,0);
 ```
 
-Creating an event for 3 full days
-```js
+Creating an event for 3 full days:
+
+```javascript
   // set the startdate to midnight and set the enddate to midnight 3 days later
   var startDate = new Date(2014,2,24,0,0,0,0,0);
   var endDate = new Date(2014,2,27,0,0,0,0,0);
 ```
 
-Example Response IOS getCalendarOptions
-```js
+Example Response iOS getCalendarOptions:
+
+```javascript
 {
-calendarId: null,
-calendarName: "calendar",
-firstReminderMinutes: 60,
-recurrence: null,
-recurrenceEndDate: null,
-recurrenceInterval: 1,
-secondReminderMinutes: null,
-url: null
+  calendarId: null,
+  calendarName: "calendar",
+  firstReminderMinutes: 60,
+  recurrence: null,
+  recurrenceEndDate: null,
+  recurrenceInterval: 1,
+  secondReminderMinutes: null,
+  url: null
 }
 ```
 
-Exmaple Response IOS Calendars
-```js
+Exmaple Response iOS listCalendars:
+
+```javascript
 {
-id: "258B0D99-394C-4189-9250-9488F75B399D",
-name: "standard calendar",
-type: "Local"
+  id: "258B0D99-394C-4189-9250-9488F75B399D",
+  name: "standard calendar",
+  type: "Local"
 }
 ```
 
-Exmaple Response IOS Event
-```js
+Exmaple Response findEvent:
+
+```javascript
 {
-calendar: "Kalender",
-endDate: "2016-06-10 23:59:59",
-id: "0F9990EB-05A7-40DB-B082-424A85B59F90",
-lastModifiedDate: "2016-06-13 09:14:02",
-location: "",
-message: "my description",
-startDate: "2016-06-10 00:00:00",
-title: "myEvent"
+  status: "Confirmed",      // iOS: None/Confirmed/Tentative/Canceled  | Android: Confirmed/Tentative/Canceled
+  location: "Neverland",
+  endDate: "2016-06-10 23:59:59",
+  id: "0F9990EB-05A7-40DB-B082-424A85B59F90",
+  startDate: "2016-06-10 00:00:00",
+  title: "Let's fly to Neverland",
+  lastModifiedDate: "2016-06-13 09:14:02",
+  calendar: "Calendar",
+  message: "Dear Julian,\r\n\r\nlet's meet in Neverland!\r\n\r\nKind regards,\r\nPeter Pan",
+  rrule: {
+    calendar: "gregorian",
+    freq: "weekly",
+    interval: 3
+  },
+  attendees: [
+    {
+      email: "peter.pan@never.land",
+      status: "Unknown",    // iOS: Unknown/Pending/Accepted/Declined/Tentative/Delegated/Completed/In Process | Android: Unknown/Accepted/Declined/Invited/Tentative
+      isCurrentUser: false,
+      name: "Peter Pan",
+      type: "Organizer",    // iOS: Unknown/Person/Room/Resource/Group/Organizer | Android: Resource/Person/Organizer
+      role: "Unknown"       // iOS: Unknown/Required/Optional/Chair/Non Participant | Android: Unknown/Required/Optional
+    },
+    {
+      email: "julian.sanio@never.land",
+      status: "Pending",
+      isCurrentUser: true,
+      name: "Julian Sanio",
+      type: "Person",
+      role: "Required"
+    },
+    {
+      email: "tinker.bell@never.land",
+      status: "Pending",
+      isCurrentUser: false,
+      name: "Tinker Bell",
+      type: "Person",
+      role: "Optional"
+    }
+  ]
 }
 ```
 
-### Android 6 (M) Permissions
+### Calendar Permissions
 On Android 6 you need to request permission to use the Calendar at runtime when targeting API level 23+.
-Even if the `uses-permission` tags for the Calendar are present in `AndroidManifest.xml`.
+Even if the `uses-permission` tags for the Calendar are present in `AndroidManifest.xml`. Same applies to iOS version 6 and later. You need to request permission to use the Calendar at runtime.
 
 Since plugin version 4.5.0 we transparently handle this for you in a just-in-time manner.
 So if you call `createEvent` we will pop up the permission dialog. After the user granted access
@@ -325,7 +373,7 @@ Note that the hasPermission functions will return true when:
 - You're using Android < 6, or
 - You've already granted permission.
 
-```js
+```javascript
   // again, this is no longer needed with plugin version 4.5.0 and up
   function hasReadWritePermission() {
     window.plugins.calendar.hasReadWritePermission(
@@ -358,7 +406,10 @@ this plugin. Kudos to [John Rodney](https://github.com/JohnRodney) for this piec
 
 ## 5. Credits
 
-This plugin was enhanced for Plugman / PhoneGap Build by [Eddy Verbruggen](http://www.x-services.nl). I fixed some issues in the native code (mainly for iOS) and changed the JS-Native functions a little in order to make a universal JS API for both platforms.
+This plugin was improved and extended by Julian Sanio, original plugin by [Eddy Verbruggen](http://www.x-services.nl), [https://github.com/EddyVerbruggen/Calendar-PhoneGap-Plugin](https://github.com/EddyVerbruggen/Calendar-PhoneGap-Plugin).
+
+This plugin was enhanced for Plugman / PhoneGap Build by [Eddy Verbruggen](http://www.x-services.nl). He fixed some issues in the native code (mainly for iOS) and changed the JS-Native functions a little in order to make a universal JS API for both platforms.
+
 * Inspired by [this nice blog of Devgirl](http://devgirl.org/2013/07/17/tutorial-how-to-write-a-phonegap-plugin-for-android/).
 * Credits for the original iOS code go to [Felix Montanez](https://github.com/felixactv8/Phonegap-Calendar-Plugin-ios).
 * Credits for the original Android code go to [Ten Forward Consulting](https://github.com/tenforwardconsulting/Phonegap-Calendar-Plugin-android) and [twistandshout](https://github.com/twistandshout/phonegap-calendar-plugin).
