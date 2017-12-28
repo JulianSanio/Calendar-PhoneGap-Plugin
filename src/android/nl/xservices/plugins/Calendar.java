@@ -181,6 +181,7 @@ public class Calendar extends CordovaPlugin {
     }
   }
 
+  @Override
   public void onRequestPermissionResult(int requestCode, String[] permissions, int[] grantResults) throws JSONException {
 
     switch(requestCode) {
@@ -661,6 +662,7 @@ public class Calendar extends CordovaPlugin {
     }
   }
 
+  @Override
   public void onActivityResult(int requestCode, int resultCode, Intent data) {
     if (requestCode == RESULT_CODE_CREATE) {
       if (resultCode == Activity.RESULT_OK || resultCode == Activity.RESULT_CANCELED) {
