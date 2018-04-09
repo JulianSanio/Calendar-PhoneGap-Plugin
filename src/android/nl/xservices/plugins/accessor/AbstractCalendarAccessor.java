@@ -48,10 +48,6 @@ public abstract class AbstractCalendarAccessor {
         String recurrenceByMonthDay;
         String recurrenceUntil;
         String recurrenceCount;
-        //attribute DOMString status;
-        // attribute DOMString transparency;
-        // attribute CalendarRepeatRule recurrence;
-        // attribute DOMString reminder;
         String calendarId;
 
         String eventId;
@@ -520,10 +516,6 @@ public abstract class AbstractCalendarAccessor {
         Map<String, ArrayList<Attendee>> attendeeMap =
                 fetchAttendeesForEventsAsMap(eventMap.keySet().toArray(new String[0]));
         // Merge the event info with the instances and turn it into a JSONArray.
-        /*for (Event event : eventMap.values()) {
-            result.put(event.toJSONObject());
-        }*/
-
         for (Event instance : instances) {
             Event event = eventMap.get(instance.eventId);
             if (event != null) {
