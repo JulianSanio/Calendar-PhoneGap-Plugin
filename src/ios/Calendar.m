@@ -825,6 +825,10 @@
 }
 
 - (void) deleteEventById:(CDVInvokedUrlCommand*)command {
+  if (![self hasCalendarPermission]) {
+    [self requestCalendarPermission];
+  }
+  
   NSDictionary* options = [command.arguments objectAtIndex:0];
   NSString* ciid = [options objectForKey:@"id"];
   NSNumber* fromTime = [options objectForKey:@"fromTime"];
